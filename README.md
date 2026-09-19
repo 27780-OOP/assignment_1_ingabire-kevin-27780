@@ -108,4 +108,64 @@ INSERT INTO order_items VALUES (22, 1013, 105, 2);
 INSERT INTO order_items VALUES (23, 1014, 106, 1);
 INSERT INTO order_items VALUES (24, 1014, 107, 1);
 INSERT INTO order_items VALUES (25, 1015, 108, 2);
+```
+---
+
+## Query Results & Interpretations
+
+### 1. JOIN Queries
+
+#### Query 1.1: List every order with the customer's name, city, and order date (INNER JOIN)
+**Business Interpretation:** This query provides a flat view of all orders, showing which customer placed them and when. It confirms that we have 15 active orders across 4 different customers. (Customer Evan Wright, who has no orders, is correctly excluded).
+![Query 1.1 Result](01_join1.png)
+
+#### Query 1.2: List every order item with product name, category, price, and quantity (JOIN)
+**Business Interpretation:** This query flattens the transaction data so we can see exactly what products were sold in each order. It helps management understand product demand (e.g., T-Shirts are popular, and Electronics are high value).
+![Query 1.2 Result](02_join2.png)
+
+#### Query 1.3: List all customers and their orders where they exist (LEFT JOIN)
+**Business Interpretation:** This is a crucial CRM (Customer Relationship Management) query. It lists every registered customer, even those who haven't bought anything. In our data, Evan Wright (Chicago) appears with NULL order details, allowing management to identify him as a target for marketing campaigns to encourage his first purchase.
+![Query 1.3 Result](03_join3.png)
+
+---
+
+### 2. CTE Query
+
+#### Query 2.1: Customers above average spend (using CTE)
+**Business Interpretation:** This query calculates the total spend of each customer and compares it to the overall average. It identifies our "VIP" customers. In our data, **Diana Prince** is the only customer who spent above the average (4,125), making her a top priority for loyalty rewards or targeted promotions.
+![Query 2.1 Result](04_cte.png)
+
+---
+
+### 3. Window Function Queries
+
+#### Query 3.1: Rank customers by total amount spent
+**Business Interpretation:** This ranks our customers from highest to lowest spending. It provides a clear leaderboard: 1st (Diana), 2nd (Alice), 3rd (Charlie), 4th (Bob). This helps management allocate marketing budgets efficiently.
+![Query 3.1 Result](05_window1_rank.png)
+
+#### Query 3.2: Number each customer's orders
+**Business Interpretation:** This assigns a sequence number to each customer's orders (e.g., 1st order, 2nd order). This is useful for understanding customer loyalty and repeat purchase behavior.
+![Query 3.2 Result](06_window2_rownum.png)
+
+#### Query 3.3: Running total of revenue over time
+**Business Interpretation:** This query shows cumulative revenue growth over our 15 orders. It allows management to visualize sales trends over time, ending at a total company revenue of 8,335.
+![Query 3.3 Result](07_window3_runningtotal.png)
+
+#### Query 3.4: Days between current and previous order
+**Business Interpretation:** This query calculates the gap in days between consecutive orders for each customer. It helps identify buying frequency. For example, we can see Diana's purchasing intervals, which helps in predicting when she might order next.
+![Query 3.4 Result](08_window4_daysbetween.png)
+
+---
+
+## Challenges and Resolutions
+
+**Challenge 1: Ensuring realistic data for Window Functions**
+Initially, I needed to ensure that the `LAG()` function (for days between orders) and the `RANK()` function had enough valid data to return meaningful results. 
+
+*Resolution:* I intentionally created multiple orders per customer spread across different dates. I also intentionally left one customer (Evan Wright) with zero orders, so that the `LEFT JOIN` query would have a definitive test case to prove it works correctly.
+
+**Challenge 2: Calculating the Running Total**
+Calculating a running total requires summing values from the current row and all previous rows. A standard `GROUP BY` would collapse all rows into one.
+
+*Resolution:* I used a CTE first to get the total revenue per order, and then applied the `SUM() OVER (ORDER BY ...)` window function. This allowed me to keep each individual order visible while still calculating the accumulated total.
 
